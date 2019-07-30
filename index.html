@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- css 引入 start -->
+    <link rel="stylesheet" href="css/weui.css">
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="http://at.alicdn.com/t/font_1322770_b9p3debkz9t.css">
+    <link rel="stylesheet" href="css/swiper.min.css">
+    <!--    css 引入 end-->
+    <title>dsapp</title>
+</head>
+
+<body>
+<div id="app" class="showNav">
+    <!--        搜索框 + 用户 -->
+    <div class="search-bar-wrap flex flex-between">
+        <!--        用户名-->
+        <div class="user flex flex-between">
+            <div class="user-img">
+                <img src="images/user.jpg" alt="">
+            </div>
+            <div class="username flex flex-h-middle">
+                <div class="name">郭大大</div>
+                <div class="level">普通用户</div>
+            </div>
+        </div>
+        <div class="weui-search-bar" id="searchBar">
+            <form class="weui-search-bar__form">
+                <div class="weui-search-bar__box">
+                    <i class="weui-icon-search"></i>
+                    <input type="search" class="weui-search-bar__input" id="searchInput" placeholder="搜索"
+                           required="" @focus="search_focus">
+                </div>
+            </form>
+            <span class="weui-search-bar__cancel-btn" id="searchCancel" @click="cancal_search_bar_focus"
+                  v-show="search_bar_focus">取消</span>
+        </div>
+    </div>
+
+    <div id="loadingToast" v-if="!dataEnd">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-loading weui-icon_toast"></i>
+            <p class="weui-toast__content">数据加载中</p>
+        </div>
+    </div>
+    <!--内容-->
+    <div class="views" v-show="!search_bar_focus" v-if="dataEnd">
+
+        <!--        轮播图-->
+        <div class="bannerview">
+            <div class="swiper-container">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide" v-for="(item, index) in banner_list" :key="index"
+                         style="height: 100%;">
+                        <div class="banner-content"><img :src="item.src" :alt="item.alt"></div>
+                    </div>
+                </div>
+                <div class="swiper-pagination"></div>
+            </div>
+        </div>
+        <!--        导航栏-->
+        <div class="homenav">
+            <div class="flex flex-mid">
+                <div class="nav-item" v-for="(item, index) in nav_list" :key="index">
+                    <div class="img-box">
+                        <a :href="item.href"><img :src="item.src" alt=""></a>
+                    </div>
+                    <p class="nav-title">{{item.title}}</p>
+                </div>
+            </div>
+        </div>
+        <!--        会员卡-->
+        <div class="member-card flex flex-between">
+            <img src="data:image/png;base64,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"
+                 alt="">
+            <div class="card-box-right flex flex-between">
+                <div class="prefecture-info"><h5 class="title overflow">会员卡专区</h5>
+                    <p class="desc overflow">一键享受更多优惠</p></div>
+                <div class="btn btn-text">
+                    立即开通
+                </div>
+            </div>
+        </div>
+        <!--        免费体验-->
+        <section class="mod">
+            <div class="flex flex-between padding20">
+                <h1 class="section-hd">{{free_experience.name}} <span
+                        class="small-font">{{free_experience.smallname}}</span></h1>
+                <span class="small-font">更多></span>
+            </div>
+            <div class="flex-mid flex-wrap">
+                <div v-for="(item, index) in free_experience.items" class="m-item">
+                    <div class="img-item">
+                        <img :src="item.src" alt="">
+                        <p>免费</p>
+                    </div>
+                    <p>{{item.content}}</p>
+                </div>
+            </div>
+
+        </section>
+        <section class="mod"></section>
+        <section class="mod"></section>
+    </div>
+
+    <!--页尾 tab -->
+    <div class="weui-tabbar vw-tab-nav flex-wrap" v-if="!search_bar_focus">
+        <div class="weui-tabbar__item " :class="tab_now ==='首页' ? 'weui-bar__item_on' : ''">
+                <span style="display: inline-block;position: relative;">
+                    <i class="iconfont icon-shouye weui-tabbar__icon"></i>
+                    <span class="weui-badge" style="position: absolute;top: -2px;right: -13px;display: none;">8</span>
+                </span>
+            <p class="weui-tabbar__label">首页</p>
+        </div>
+        <div class="weui-tabbar__item " :class="tab_now ===2 ? 'weui-bar__item_on' : ''">
+                <span style="display: inline-block;position: relative;">
+                    <i class="iconfont icon-xuexi- weui-tabbar__icon"></i>
+                    <span class="weui-badge" style="position: absolute;top: -2px;right: -13px;display: none;"></span>
+                </span>
+            <p class="weui-tabbar__label">研习社</p>
+        </div>
+        <div class="weui-tabbar__item " :class="tab_now ===3 ? 'weui-bar__item_on' : ''">
+                <span style="display: inline-block;position: relative;">
+                    <i class="iconfont icon-yigouxiangmu weui-tabbar__icon"></i>
+                    <span class="weui-badge" style="position: absolute;top: -2px;right: -13px;display: none;"></span>
+                </span>
+            <p class="weui-tabbar__label">已购</p>
+        </div>
+        <div class="weui-tabbar__item " :class="tab_now ===4 ? 'weui-bar__item_on' : ''">
+                <span style="display: inline-block;position: relative;">
+                    <i class="iconfont icon-iconfontzhizuobiaozhun023110 weui-tabbar__icon"></i>
+                    <span class="weui-badge" style="position: absolute;top: -2px;right: -13px;display: none;"></span>
+                </span>
+            <p class="weui-tabbar__label">消息</p>
+        </div>
+        <div class="weui-tabbar__item " :class="tab_now ===5 ? 'weui-bar__item_on' : ''">
+                <span style="display: inline-block;position: relative;">
+                    <i class="iconfont icon-wode weui-tabbar__icon"></i>
+                    <span class="weui-badge" style="position: absolute;top: -2px;right: -13px;display: none;"></span>
+                </span>
+            <p class="weui-tabbar__label">我的</p>
+        </div>
+    </div>
+
+</div>
+
+<!-- js 引入 start -->
+<script src="js/fetch.js"></script>
+<script src="js/api.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+<script src="js/swiper.min.js"></script>
+<script src="js/vue.js"></script>
+<script src="js/app.js"></script>
+<!-- js 引入 end-->
+</body>
+
+</html>
